@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudyNotes</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Fraunces:ital,wght@0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+/* ══════════════════ THEME TOKENS ══════════════════ */
+:root{
+  --bg:#FAFAF7;--bg2:#F0EFE9;--bg-s:#E7E5DC;--bg-c:#FFFFFF;--bg-i:#FFFFFF;
+  --tx:#1A1A18;--tx2:#5C5B56;--tx3:#9A998F;
+  --bd:#D6D4CC;--bd2:#E8E6DD;
+  --ac:#2D6A4F;--ac-l:#D8F3DC;--ac-h:#1B4332;--ac-g:rgba(45,106,79,0.08);
+  --dn:#C1292E;--dn-l:#FFE0E0;
+  --gold:#8B7B50;--gold-l:rgba(139,123,80,0.1);
+  --s1:0 1px 3px rgba(0,0,0,0.04);--s2:0 4px 14px rgba(0,0,0,0.06);--s3:0 8px 30px rgba(0,0,0,0.08);
+  --r:10px;--r2:14px;
+  --t:0.22s cubic-bezier(0.4,0,0.2,1)
+}
+[data-theme="dark"]{
+  --bg:#0D0D0C;--bg2:#161615;--bg-s:#111110;--bg-c:#1A1A18;--bg-i:#1E1E1C;
+  --tx:#E8E5DC;--tx2:#A09D94;--tx3:#5E5C56;
+  --bd:#2A2926;--bd2:#1F1E1C;
+  --ac:#6FCF97;--ac-l:rgba(111,207,151,0.08);--ac-h:#8EDBB0;--ac-g:rgba(111,207,151,0.04);
+  --dn:#E85D5D;--dn-l:rgba(232,93,93,0.12);
+  --gold:#D4B87A;--gold-l:rgba(212,184,122,0.08);
+  --s1:0 1px 4px rgba(0,0,0,0.5);--s2:0 4px 16px rgba(0,0,0,0.6);--s3:0 12px 40px rgba(0,0,0,0.7)
+}
+
+/* ══════════════════ RESET & BASE ══════════════════ */
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);height:100vh;overflow:hidden;transition:background 0.4s,color 0.4s}
+
+/* Grain overlay */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:0.022;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+[data-theme="dark"] body::after{opacity:0.04}
+
+/* ══════════════════ LAYOUT ══════════════════ */
+.app{display:grid;grid-template-columns:280px 1fr;height:100vh}
+
+/* ══════════════════ SIDEBAR ══════════════════ */
+.sidebar{background:var(--bg-s);border-right:1px solid var(--bd2);display:flex;flex-direction:column;overflow:hidden}
+.sidebar-header{padding:16px 18px;border-bottom:1px solid var(--bd2);display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:'Fraunces',serif;font-size:20px;font-weight:700;color:var(--ac);display:flex;align-items:center;gap:9px;letter-spacing:-0.5px}
+.logo svg{width:22px;height:22px;fill:var(--ac)}
+.header-actions{display:flex;gap:6px}
+.header-btn{width:34px;height:34px;border:1px solid var(--bd);border-radius:var(--r);background:var(--bg-c);color:var(--tx2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--t)}
+.header-btn:hover{background:var(--ac);color:#fff;border-color:var(--ac)}
+.header-btn:active{transform:scale(0.92)}
+.header-btn.pomo-active{background:var(--ac);color:#fff;border-color:var(--ac);animation:pomo-glow 2s ease-in-out infinite}
+@keyframes pomo-glow{0%,100%{box-shadow:0 0 0 0 rgba(111,207,151,0)}50%{box-shadow:0 0 12px 3px rgba(111,207,151,0.3)}}
+
+.sidebar-search{padding:12px 18px}
+.search-box{width:100%;padding:9px 14px 9px 36px;border:1px solid var(--bd);border-radius:var(--r);background:var(--bg-c);color:var(--tx);font:14px 'DM Sans',sans-serif;transition:all var(--t);outline:none}
+.search-box:focus{border-color:var(--ac);box-shadow:0 0 0 3px var(--ac-g)}
+.search-wrap{position:relative}
+.search-wrap svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--tx3)}
+
+.note-list{flex:1;overflow-y:auto;padding:6px 10px;scrollbar-width:thin;scrollbar-color:var(--bd) transparent}
+.note-card{padding:12px 14px;border-radius:var(--r);cursor:pointer;transition:all var(--t);border:1px solid transparent;margin-bottom:4px;position:relative}
+.note-card:hover{background:var(--bg-c);border-color:var(--bd2)}
+.note-card.active{background:var(--bg-c);border-color:var(--ac);box-shadow:var(--s1)}
+.note-card.deleting{animation:slide-out 0.3s ease forwards}
+@keyframes slide-out{to{transform:translateX(-100%);opacity:0;height:0;padding:0;margin:0;border:0}}
+.note-card .drag-handle{position:absolute;left:2px;top:50%;transform:translateY(-50%);opacity:0;cursor:grab;color:var(--tx3);font-size:12px;transition:opacity var(--t)}
+.note-card:hover .drag-handle{opacity:0.5}
+.note-card .drag-handle:hover{opacity:1}
+.note-card.dragging{opacity:0.4;background:var(--ac-l)}
+.note-title{font-weight:600;font-size:14px;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:14px}
+.note-meta{font-size:11px;color:var(--tx3);margin-top:4px;padding-left:14px;display:flex;gap:8px}
+.note-snippet{font-size:12px;color:var(--tx2);margin-top:5px;padding-left:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;opacity:0.7}
+
+.sidebar-stats{padding:14px 18px;border-top:1px solid var(--bd2);font-size:11px;color:var(--tx3);display:flex;gap:14px;flex-wrap:wrap}
+.stat-item{display:flex;align-items:center;gap:4px}
+.stat-val{font-weight:600;color:var(--tx2)}
+
+/* ══════════════════ MAIN EDITOR ══════════════════ */
+.main{display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
+.toolbar{padding:10px 20px;border-bottom:1px solid var(--bd2);display:flex;align-items:center;gap:6px;flex-wrap:wrap;background:var(--bg2)}
+.toolbar-group{display:flex;gap:3px;align-items:center}
+.toolbar-sep{width:1px;height:22px;background:var(--bd);margin:0 6px}
+.tb{width:32px;height:32px;border:none;border-radius:8px;background:transparent;color:var(--tx2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;transition:all var(--t)}
+.tb:hover{background:var(--ac-g);color:var(--ac)}
+.tb:active{transform:scale(0.88)}
+.tb svg{width:16px;height:16px}
+
+/* Color picker */
+.color-wrap{position:relative}
+.color-dropdown{display:none;position:absolute;top:38px;left:50%;transform:translateX(-50%);background:var(--bg-c);border:1px solid var(--bd);border-radius:var(--r);padding:10px;box-shadow:var(--s3);z-index:100;flex-wrap:wrap;gap:6px;width:160px}
+.color-dropdown.open{display:flex}
+.color-dropdown::before{content:'';position:absolute;top:-6px;left:50%;transform:translateX(-50%) rotate(45deg);width:10px;height:10px;background:var(--bg-c);border-left:1px solid var(--bd);border-top:1px solid var(--bd)}
+.color-dot{width:24px;height:24px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all var(--t)}
+.color-dot:hover{transform:scale(1.2)}
+.color-dot.active{border-color:var(--tx);box-shadow:0 0 0 2px var(--bg-c)}
+
+.title-input{width:100%;padding:16px 28px 4px;border:none;background:transparent;font-family:'Fraunces',serif;font-size:26px;font-weight:700;color:var(--tx);outline:none}
+.title-input::placeholder{color:var(--tx3)}
+
+.editor-wrap{flex:1;overflow:hidden;position:relative;display:flex;flex-direction:column}
+.editor{flex:1;padding:8px 28px 60px;overflow-y:auto;outline:none;font-size:15px;line-height:1.85;color:var(--tx);min-height:200px;scrollbar-width:thin;scrollbar-color:var(--bd) transparent;
+  background-image:repeating-linear-gradient(transparent,transparent 31px,var(--bd2) 31px,var(--bd2) 32px);background-size:100% 32px}
+.editor:empty::before{content:attr(data-placeholder);color:var(--tx3);pointer-events:none}
+.editor img{max-width:100%;border-radius:var(--r);margin:8px 0;box-shadow:var(--s1)}
+.editor h1,.editor h2,.editor h3{font-family:'Fraunces',serif;margin:16px 0 8px;color:var(--tx)}
+.editor h1{font-size:24px}
+.editor h2{font-size:20px}
+.editor h3{font-size:17px}
+.editor blockquote{border-left:3px solid var(--gold);padding:8px 16px;margin:8px 0;background:var(--gold-l);border-radius:0 var(--r) var(--r) 0;font-style:italic;color:var(--tx2)}
+.editor pre,.editor code{font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--bg2);border-radius:6px;padding:2px 6px}
+.editor pre{padding:14px;margin:8px 0;overflow-x:auto}
+.editor ul,.editor ol{margin:8px 0;padding-left:24px}
+.editor a{color:var(--ac);text-decoration:underline}
+
+.word-count{position:absolute;bottom:8px;right:20px;font-size:11px;color:var(--tx3);background:var(--bg);padding:3px 10px;border-radius:20px;border:1px solid var(--bd2);opacity:0.7}
+
+/* Editor actions */
+.editor-actions{padding:10px 20px;border-top:1px solid var(--bd2);display:flex;gap:8px;background:var(--bg2);flex-wrap:wrap}
+.action-btn{padding:7px 16px;border:1px solid var(--bd);border-radius:var(--r);background:var(--bg-c);color:var(--tx2);font:13px 'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all var(--t)}
+.action-btn:hover{border-color:var(--ac);color:var(--ac)}
+.action-btn:active{transform:scale(0.95)}
+.action-btn.danger{color:var(--dn)}
+.action-btn.danger:hover{border-color:var(--dn);background:var(--dn-l)}
+.action-btn svg{width:14px;height:14px}
+
+/* ══════════════════ EMPTY STATE ══════════════════ */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--tx3);text-align:center;padding:40px}
+.empty-icon{width:80px;height:80px;border:2px dashed var(--bd);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:20px;animation:spin-slow 20s linear infinite}
+@keyframes spin-slow{to{transform:rotate(360deg)}}
+.empty-icon svg{width:32px;height:32px;stroke:var(--tx3)}
+.empty-state h3{font-family:'Fraunces',serif;font-size:20px;color:var(--tx2);margin-bottom:8px}
+.empty-state p{font-size:14px;max-width:280px;line-height:1.6}
+
+/* ══════════════════ POMODORO PANEL ══════════════════ */
+.pomo-panel{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--bg-c);border:1px solid var(--bd);border-radius:var(--r2);padding:30px;box-shadow:var(--s3);z-index:200;width:320px;text-align:center}
+.pomo-panel.open{display:block;animation:fade-in 0.25s ease}
+@keyframes fade-in{from{opacity:0;transform:translate(-50%,-50%) scale(0.95)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+.pomo-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:199}
+.pomo-overlay.open{display:block}
+.pomo-close{position:absolute;top:12px;right:12px;background:none;border:none;color:var(--tx3);cursor:pointer;font-size:20px}
+.pomo-mode{display:flex;gap:8px;margin-bottom:20px;justify-content:center}
+.pomo-mode button{padding:6px 16px;border:1px solid var(--bd);border-radius:20px;background:transparent;color:var(--tx2);font:13px 'DM Sans',sans-serif;cursor:pointer;transition:all var(--t)}
+.pomo-mode button.active{background:var(--ac);color:#fff;border-color:var(--ac)}
+.pomo-time{font-family:'JetBrains Mono',monospace;font-size:56px;font-weight:500;color:var(--tx);margin:16px 0}
+.pomo-progress{width:100%;height:4px;background:var(--bd2);border-radius:2px;overflow:hidden;margin:12px 0 20px}
+.pomo-bar{height:100%;background:var(--ac);transition:width 1s linear;border-radius:2px}
+.pomo-actions{display:flex;gap:10px;justify-content:center}
+.pomo-btn{padding:10px 24px;border:1px solid var(--bd);border-radius:var(--r);background:transparent;color:var(--tx2);font:14px 'DM Sans',sans-serif;cursor:pointer;transition:all var(--t)}
+.pomo-btn:hover{border-color:var(--ac);color:var(--ac)}
+.pomo-btn.primary{background:var(--ac);color:#fff;border-color:var(--ac)}
+.pomo-btn.primary:hover{opacity:0.9}
+.pomo-stats{display:flex;justify-content:center;gap:24px;margin-top:18px;font-size:12px;color:var(--tx3)}
+.pomo-stat-val{display:block;font-size:20px;font-weight:700;color:var(--ac)}
+
+/* ══════════════════ THEME TOGGLE ══════════════════ */
+.theme-toggle{position:fixed;bottom:24px;right:24px;width:44px;height:44px;border-radius:50%;border:1px solid var(--bd);background:var(--bg-c);color:var(--tx2);cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:var(--s2);transition:all var(--t);z-index:50}
+.theme-toggle:hover{transform:scale(1.1);border-color:var(--ac);color:var(--ac)}
+[data-theme="dark"] .theme-toggle{border-color:var(--gold);color:var(--gold);box-shadow:0 0 16px rgba(212,184,122,0.15)}
+
+/* ══════════════════ TOAST ══════════════════ */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);padding:12px 24px;background:var(--bg-c);border:1px solid var(--bd);border-radius:var(--r);font-size:13px;color:var(--tx);box-shadow:var(--s3);z-index:300;transition:transform 0.35s ease,opacity 0.35s;opacity:0;pointer-events:none}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+[data-theme="dark"] .toast{background:#1A1A18;border-color:var(--ac);color:var(--ac)}
+
+/* ══════════════════ SCROLLBAR ══════════════════ */
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bd);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--tx3)}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- ═══ SIDEBAR ═══ -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM17 14v8M13 18h8"/></svg>
+        StudyNotes
+      </div>
+      <div class="header-actions">
+        <button class="header-btn" id="pomo-toggle" onclick="togglePomo()" title="Pomodoro">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3L2 6"/><path d="M22 6l-3-3"/></svg>
+        </button>
+        <button class="header-btn" onclick="createNote()" title="Yeni Not (Ctrl+N)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="sidebar-search">
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="search-box" type="text" placeholder="Notlarda ara..." oninput="renderNotes()">
+      </div>
+    </div>
+    <div class="note-list" id="note-list"></div>
+    <div class="sidebar-stats" id="sidebar-stats"></div>
+  </div>
+
+  <!-- ═══ MAIN ═══ -->
+  <div class="main" id="main-area">
+    <div class="empty-state" id="empty-state">
+      <div class="empty-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      <h3>Henüz not yok</h3>
+      <p>Yeni bir not oluşturmak için + butonuna tıkla veya Ctrl+N kısayolunu kullan.</p>
+    </div>
+
+    <div id="editor-container" style="display:none;flex:1;display:none;flex-direction:column;overflow:hidden">
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <div class="toolbar-group">
+          <button class="tb" onclick="fmt('bold')" title="Kalın (Ctrl+B)"><b>B</b></button>
+          <button class="tb" onclick="fmt('italic')" title="İtalik (Ctrl+I)"><i>I</i></button>
+          <button class="tb" onclick="fmt('underline')" title="Altı Çizili (Ctrl+U)"><u>U</u></button>
+          <button class="tb" onclick="fmt('strikeThrough')" title="Üstü Çizili"><s>S</s></button>
+        </div>
+        <div class="toolbar-sep"></div>
+        <div class="toolbar-group">
+          <button class="tb" onclick="fmtBlock('h1')" title="Başlık 1">H1</button>
+          <button class="tb" onclick="fmtBlock('h2')" title="Başlık 2">H2</button>
+          <button class="tb" onclick="fmtBlock('h3')" title="Başlık 3">H3</button>
+        </div>
+        <div class="toolbar-sep"></div>
+        <div class="toolbar-group">
+          <button class="tb" onclick="fmt('insertUnorderedList')" title="Liste">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="4" cy="6" r="1" fill="currentColor"/><circle cx="4" cy="12" r="1" fill="currentColor"/><circle cx="4" cy="18" r="1" fill="currentColor"/></svg>
+          </button>
+          <button class="tb" onclick="fmt('insertOrderedList')" title="Numaralı Liste">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/><text x="2" y="8" font-size="8" fill="currentColor" stroke="none">1</text><text x="2" y="14" font-size="8" fill="currentColor" stroke="none">2</text><text x="2" y="20" font-size="8" fill="currentColor" stroke="none">3</text></svg>
+          </button>
+          <button class="tb" onclick="fmtBlock('blockquote')" title="Alıntı">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V21z"/><path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3z"/></svg>
+          </button>
+          <button class="tb" onclick="insertCode()" title="Kod Bloğu">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          </button>
+        </div>
+        <div class="toolbar-sep"></div>
+        <div class="toolbar-group">
+          <button class="tb" onclick="insertLink()" title="Bağlantı">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+          </button>
+          <button class="tb" onclick="insertImage()" title="Resim Ekle">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          </button>
+          <div class="color-wrap">
+            <button class="tb" onclick="toggleColorPicker()" title="Metin Rengi" id="color-btn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3L4 21h16L12 3z" fill="none"/><line x1="8" y1="16" x2="16" y2="16"/></svg>
+            </button>
+            <div class="color-dropdown" id="color-dropdown">
+              <div class="color-dot active" style="background:#E8593C" onclick="setColor('#E8593C')"></div>
+              <div class="color-dot" style="background:#D4537E" onclick="setColor('#D4537E')"></div>
+              <div class="color-dot" style="background:#7B68EE" onclick="setColor('#7B68EE')"></div>
+              <div class="color-dot" style="background:#2D6A4F" onclick="setColor('#2D6A4F')"></div>
+              <div class="color-dot" style="background:#1D9E75" onclick="setColor('#1D9E75')"></div>
+              <div class="color-dot" style="background:#D4A853" onclick="setColor('#D4A853')"></div>
+              <div class="color-dot" style="background:#3A86C7" onclick="setColor('#3A86C7')"></div>
+              <div class="color-dot" style="background:#1A1A18" onclick="setColor('#1A1A18')"></div>
+              <div class="color-dot" style="background:#6B6A64" onclick="setColor('#6B6A64')"></div>
+              <div class="color-dot" style="background:transparent;border:2px dashed var(--bd)" onclick="removeColor()" title="Rengi Kaldır">✕</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <input class="title-input" id="note-title" placeholder="Başlık..." oninput="onTitleChange()">
+      <div class="editor-wrap">
+        <div class="editor" id="editor" contenteditable="true" data-placeholder="Yazmaya başla..." oninput="onEditorInput()"></div>
+        <div class="word-count" id="word-count">0 kelime · 0 karakter</div>
+      </div>
+
+      <div class="editor-actions">
+        <button class="action-btn" onclick="shareNote()" title="Notu HTML olarak paylaş">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          Paylaş
+        </button>
+        <button class="action-btn" onclick="exportPDF()" title="PDF olarak kaydet">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          PDF
+        </button>
+        <button class="action-btn" onclick="exportJSON()">📦 Dışa Aktar</button>
+        <button class="action-btn" onclick="document.getElementById('import-file').click()">📥 İçe Aktar</button>
+        <input type="file" id="import-file" accept=".json" style="display:none" onchange="importJSON(event)">
+        <input type="file" id="img-file" accept="image/*" style="display:none" onchange="handleImageFile(event)">
+        <button class="action-btn danger" onclick="deleteNote()" title="Notu Sil">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+          Sil
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ POMODORO PANEL ═══ -->
+<div class="pomo-overlay" id="pomo-overlay" onclick="togglePomo()"></div>
+<div class="pomo-panel" id="pomo-panel">
+  <button class="pomo-close" onclick="togglePomo()">✕</button>
+  <div class="pomo-mode">
+    <button class="active" onclick="pomoSetMode('work',this)">Çalışma</button>
+    <button onclick="pomoSetMode('short',this)">Kısa Mola</button>
+    <button onclick="pomoSetMode('long',this)">Uzun Mola</button>
+  </div>
+  <div class="pomo-time" id="pomo-time">25:00</div>
+  <div class="pomo-progress"><div class="pomo-bar" id="pomo-bar" style="width:100%"></div></div>
+  <div class="pomo-actions">
+    <button class="pomo-btn primary" id="pomo-start" onclick="pomoStartPause()">Başlat</button>
+    <button class="pomo-btn" onclick="pomoReset()">Sıfırla</button>
+  </div>
+  <div class="pomo-stats">
+    <div><span class="pomo-stat-val" id="pomo-sessions">0</span>oturum</div>
+    <div><span class="pomo-stat-val" id="pomo-total">0</span>dakika</div>
+  </div>
+</div>
+
+<!-- ═══ THEME TOGGLE ═══ -->
+<button class="theme-toggle" onclick="toggleTheme()" title="Tema değiştir">
+  <svg id="icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+  <svg id="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+</button>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════ STATE ═══════════════════
+let notes = [];
+let activeId = null;
+let selectedColor = '#E8593C';
+let savedSelection = null;
+
+// ═══════════════════ PERSISTENCE ═══════════════════
+function save() {
+  localStorage.setItem('sn_data', JSON.stringify(notes));
+  localStorage.setItem('sn_active', activeId || '');
+  localStorage.setItem('sn_order', JSON.stringify(notes.map(n => n.id)));
+  updateStats();
+}
+
+function load() {
+  try {
+    const d = localStorage.getItem('sn_data');
+    if (d) {
+      notes = JSON.parse(d);
+      const order = JSON.parse(localStorage.getItem('sn_order') || '[]');
+      if (order.length) notes.sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
+      activeId = localStorage.getItem('sn_active') || null;
+      if (activeId && !notes.find(n => n.id === activeId)) activeId = notes[0]?.id || null;
+    }
+  } catch (e) { notes = []; }
+}
+
+// ═══════════════════ NOTES CRUD ═══════════════════
+function createNote() {
+  const note = {
+    id: Date.now().toString(),
+    title: '',
+    content: '',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+  notes.unshift(note);
+  activeId = note.id;
+  save();
+  renderNotes();
+  showEditor();
+  document.getElementById('note-title').focus();
+}
+
+function deleteNote() {
+  if (!activeId) return;
+  const card = document.querySelector(`.note-card[data-id="${activeId}"]`);
+  if (card) {
+    card.classList.add('deleting');
+    setTimeout(() => {
+      notes = notes.filter(n => n.id !== activeId);
+      activeId = notes[0]?.id || null;
+      save();
+      renderNotes();
+      if (activeId) showEditor();
+      else hideEditor();
+    }, 300);
+  } else {
+    notes = notes.filter(n => n.id !== activeId);
+    activeId = notes[0]?.id || null;
+    save();
+    renderNotes();
+    if (activeId) showEditor();
+    else hideEditor();
+  }
+  toast('Not silindi');
+}
+
+function getActiveNote() { return notes.find(n => n.id === activeId); }
+
+function onTitleChange() {
+  const note = getActiveNote();
+  if (!note) return;
+  note.title = document.getElementById('note-title').value;
+  note.updatedAt = new Date().toISOString();
+  save();
+  renderNotes(true);
+}
+
+function onEditorInput() {
+  const note = getActiveNote();
+  if (!note) return;
+  note.content = document.getElementById('editor').innerHTML;
+  note.updatedAt = new Date().toISOString();
+  save();
+  updateWordCount();
+  renderNotes(true);
+}
+
+// ═══════════════════ RENDER ═══════════════════
+function renderNotes(noSwitch) {
+  const list = document.getElementById('note-list');
+  const q = document.querySelector('.search-box').value.toLowerCase();
+  const filtered = notes.filter(n => {
+    const text = (n.title + ' ' + stripHTML(n.content)).toLowerCase();
+    return text.includes(q);
+  });
+
+  list.innerHTML = filtered.map(n => {
+    const snippet = stripHTML(n.content).substring(0, 80);
+    const date = new Date(n.updatedAt);
+    const timeStr = date.toLocaleDateString('tr-TR', { day:'numeric', month:'short' }) + ' ' + date.toLocaleTimeString('tr-TR', { hour:'2-digit', minute:'2-digit' });
+    return `<div class="note-card${n.id === activeId ? ' active' : ''}" data-id="${n.id}" onclick="selectNote('${n.id}')" draggable="true" ondragstart="dragStart(event)" ondragover="dragOver(event)" ondrop="dragDrop(event)" ondragend="dragEnd(event)">
+      <div class="drag-handle">⠿</div>
+      <div class="note-title">${n.title || 'Başlıksız Not'}</div>
+      <div class="note-meta"><span>${timeStr}</span></div>
+      ${snippet ? `<div class="note-snippet">${snippet}</div>` : ''}
+    </div>`;
+  }).join('');
+
+  if (!noSwitch) {
+    if (activeId) showEditor();
+    else hideEditor();
+  }
+  updateStats();
+}
+
+function selectNote(id) {
+  // Save current first
+  const prev = getActiveNote();
+  if (prev) {
+    prev.content = document.getElementById('editor').innerHTML;
+    prev.title = document.getElementById('note-title').value;
+  }
+  activeId = id;
+  save();
+  renderNotes();
+  showEditor();
+}
+
+function showEditor() {
+  const note = getActiveNote();
+  if (!note) return;
+  document.getElementById('empty-state').style.display = 'none';
+  const ec = document.getElementById('editor-container');
+  ec.style.display = 'flex';
+  document.getElementById('note-title').value = note.title;
+  document.getElementById('editor').innerHTML = note.content;
+  updateWordCount();
+}
+
+function hideEditor() {
+  document.getElementById('empty-state').style.display = 'flex';
+  document.getElementById('editor-container').style.display = 'none';
+}
+
+function stripHTML(html) {
+  const d = document.createElement('div');
+  d.innerHTML = html;
+  return d.textContent || '';
+}
+
+function updateWordCount() {
+  const text = stripHTML(document.getElementById('editor').innerHTML).trim();
+  const words = text ? text.split(/\s+/).length : 0;
+  const chars = text.length;
+  document.getElementById('word-count').textContent = `${words} kelime · ${chars} karakter`;
+}
+
+function updateStats() {
+  const total = notes.length;
+  const totalWords = notes.reduce((s, n) => {
+    const t = stripHTML(n.content).trim();
+    return s + (t ? t.split(/\s+/).length : 0);
+  }, 0);
+  const last = notes.length ? new Date(Math.max(...notes.map(n => new Date(n.updatedAt)))).toLocaleDateString('tr-TR', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' }) : '-';
+  document.getElementById('sidebar-stats').innerHTML = `
+    <div class="stat-item"><span class="stat-val">${total}</span> not</div>
+    <div class="stat-item"><span class="stat-val">${totalWords}</span> kelime</div>
+    <div class="stat-item">Son: ${last}</div>
+  `;
+}
+
+// ═══════════════════ FORMATTING ═══════════════════
+function fmt(cmd, val) {
+  document.getElementById('editor').focus();
+  document.execCommand(cmd, false, val || null);
+  onEditorInput();
+}
+
+function fmtBlock(tag) {
+  document.getElementById('editor').focus();
+  if (tag === 'blockquote') {
+    document.execCommand('formatBlock', false, '<blockquote>');
+  } else {
+    document.execCommand('formatBlock', false, `<${tag}>`);
+  }
+  onEditorInput();
+}
+
+function insertCode() {
+  const sel = window.getSelection();
+  if (sel.rangeCount) {
+    const range = sel.getRangeAt(0);
+    const code = document.createElement('pre');
+    code.textContent = sel.toString() || 'kod buraya...';
+    range.deleteContents();
+    range.insertNode(code);
+    onEditorInput();
+  }
+}
+
+function insertLink() {
+  const url = prompt('Bağlantı URL:');
+  if (url) fmt('createLink', url);
+}
+
+function insertImage() {
+  document.getElementById('img-file').click();
+}
+
+function handleImageFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function (ev) {
+    document.getElementById('editor').focus();
+    document.execCommand('insertImage', false, ev.target.result);
+    onEditorInput();
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+}
+
+// Editor paste/drop images
+document.addEventListener('DOMContentLoaded', () => {
+  const editor = document.getElementById('editor');
+  editor.addEventListener('paste', e => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        e.preventDefault();
+        const file = item.getAsFile();
+        const reader = new FileReader();
+        reader.onload = ev => {
+          document.execCommand('insertImage', false, ev.target.result);
+          onEditorInput();
+        };
+        reader.readAsDataURL(file);
+        break;
+      }
+    }
+  });
+  editor.addEventListener('drop', e => {
+    const file = e.dataTransfer?.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      e.preventDefault();
+      const reader = new FileReader();
+      reader.onload = ev => {
+        document.execCommand('insertImage', false, ev.target.result);
+        onEditorInput();
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+});
+
+// ═══════════════════ COLOR ═══════════════════
+function toggleColorPicker() {
+  const dd = document.getElementById('color-dropdown');
+  dd.classList.toggle('open');
+  if (dd.classList.contains('open')) {
+    savedSelection = saveSelection();
+  }
+}
+
+function setColor(c) {
+  selectedColor = c;
+  document.querySelectorAll('.color-dot').forEach(d => d.classList.remove('active'));
+  event.target.classList.add('active');
+  if (savedSelection) restoreSelection(savedSelection);
+  document.execCommand('foreColor', false, c);
+  document.getElementById('color-dropdown').classList.remove('open');
+  onEditorInput();
+}
+
+function removeColor() {
+  if (savedSelection) restoreSelection(savedSelection);
+  document.execCommand('removeFormat', false, null);
+  document.getElementById('color-dropdown').classList.remove('open');
+  onEditorInput();
+}
+
+function saveSelection() {
+  const sel = window.getSelection();
+  if (sel.rangeCount > 0) return sel.getRangeAt(0).cloneRange();
+  return null;
+}
+
+function restoreSelection(range) {
+  if (!range) return;
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
+
+// Close color picker on outside click
+document.addEventListener('click', e => {
+  if (!e.target.closest('.color-wrap')) {
+    document.getElementById('color-dropdown').classList.remove('open');
+  }
+});
+
+// ═══════════════════ DRAG & DROP ═══════════════════
+let dragId = null;
+function dragStart(e) {
+  dragId = e.currentTarget.dataset.id;
+  e.currentTarget.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+}
+function dragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+function dragDrop(e) {
+  e.preventDefault();
+  const targetId = e.currentTarget.dataset.id;
+  if (dragId === targetId) return;
+  const fromIdx = notes.findIndex(n => n.id === dragId);
+  const toIdx = notes.findIndex(n => n.id === targetId);
+  const [moved] = notes.splice(fromIdx, 1);
+  notes.splice(toIdx, 0, moved);
+  save();
+  renderNotes();
+}
+function dragEnd(e) { e.currentTarget.classList.remove('dragging'); dragId = null; }
+
+// ═══════════════════ IMPORT/EXPORT ═══════════════════
+function exportJSON() {
+  const data = JSON.stringify({ studyNotes: notes, exportedAt: new Date().toISOString() }, null, 2);
+  downloadFile(data, `studynotes_${dateStr()}.json`, 'application/json');
+  toast('Notlar dışa aktarıldı');
+}
+
+function importJSON(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      const imported = data.studyNotes || data;
+      if (Array.isArray(imported)) {
+        notes = [...imported, ...notes];
+        activeId = notes[0]?.id || null;
+        save();
+        renderNotes();
+        toast(`${imported.length} not içe aktarıldı`);
+      }
+    } catch { toast('Geçersiz dosya formatı'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+function exportPDF() {
+  const note = getActiveNote();
+  if (!note) return;
+  const el = document.createElement('div');
+  el.innerHTML = `<h1 style="font-family:Georgia,serif;margin-bottom:16px">${note.title || 'Başlıksız Not'}</h1>${note.content}`;
+  el.style.cssText = 'padding:20px;font-family:Georgia,serif;font-size:14px;line-height:1.8;color:#1a1a18';
+  html2pdf().set({ margin: [15, 15], filename: `${note.title || 'not'}.pdf`, image: { type: 'jpeg', quality: 0.95 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'mm', format: 'a4' } }).from(el).save();
+  toast('PDF kaydediliyor...');
+}
+
+function shareNote() {
+  const note = getActiveNote();
+  if (!note) return;
+  const html = `<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>${note.title || 'StudyNotes'}</title><style>body{font-family:Georgia,serif;max-width:720px;margin:40px auto;padding:0 20px;line-height:1.9;color:#1a1a18;background:#FAFAF7}h1{font-size:28px;margin-bottom:20px;border-bottom:2px solid #2D6A4F;padding-bottom:12px}img{max-width:100%;border-radius:8px;margin:12px 0}blockquote{border-left:3px solid #C4A96A;padding:10px 20px;margin:12px 0;background:rgba(196,169,106,0.06);font-style:italic}pre,code{font-family:monospace;background:#f0efe9;border-radius:4px;padding:2px 6px}pre{padding:16px;overflow-x:auto}.footer{margin-top:40px;padding-top:16px;border-top:1px solid #e8e6dd;font-size:12px;color:#9a998f;text-align:center}</style></head><body><h1>${note.title || 'Başlıksız Not'}</h1>${note.content}<div class="footer">StudyNotes ile oluşturuldu · ${new Date().toLocaleDateString('tr-TR')}</div></body></html>`;
+  downloadFile(html, `${note.title || 'not'}.html`, 'text/html');
+  toast('Not paylaşım dosyası indirildi');
+}
+
+function downloadFile(content, filename, type) {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function dateStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+// ═══════════════════ POMODORO ═══════════════════
+let pomoState = { mode: 'work', running: false, seconds: 25 * 60, total: 25 * 60, sessions: 0, totalMin: 0, interval: null };
+const pomoTimes = { work: 25 * 60, short: 5 * 60, long: 15 * 60 };
+
+function togglePomo() {
+  const panel = document.getElementById('pomo-panel');
+  const overlay = document.getElementById('pomo-overlay');
+  const open = panel.classList.toggle('open');
+  overlay.classList.toggle('open', open);
+}
+
+function pomoSetMode(mode, btn) {
+  pomoState.mode = mode;
+  pomoState.seconds = pomoTimes[mode];
+  pomoState.total = pomoTimes[mode];
+  pomoState.running = false;
+  clearInterval(pomoState.interval);
+  document.getElementById('pomo-start').textContent = 'Başlat';
+  document.querySelectorAll('.pomo-mode button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  updatePomoDisplay();
+  document.getElementById('pomo-toggle').classList.remove('pomo-active');
+}
+
+function pomoStartPause() {
+  if (pomoState.running) {
+    clearInterval(pomoState.interval);
+    pomoState.running = false;
+    document.getElementById('pomo-start').textContent = 'Devam';
+    document.getElementById('pomo-toggle').classList.remove('pomo-active');
+  } else {
+    pomoState.running = true;
+    document.getElementById('pomo-start').textContent = 'Duraklat';
+    document.getElementById('pomo-toggle').classList.add('pomo-active');
+    pomoState.interval = setInterval(() => {
+      pomoState.seconds--;
+      if (pomoState.seconds <= 0) {
+        clearInterval(pomoState.interval);
+        pomoState.running = false;
+        if (pomoState.mode === 'work') {
+          pomoState.sessions++;
+          pomoState.totalMin += pomoTimes.work / 60;
+        }
+        document.getElementById('pomo-sessions').textContent = pomoState.sessions;
+        document.getElementById('pomo-total').textContent = pomoState.totalMin;
+        document.getElementById('pomo-start').textContent = 'Başlat';
+        document.getElementById('pomo-toggle').classList.remove('pomo-active');
+        toast(pomoState.mode === 'work' ? 'Çalışma bitti! Mola ver.' : 'Mola bitti! Çalışmaya başla.');
+        // Auto switch
+        if (pomoState.mode === 'work') {
+          pomoState.mode = pomoState.sessions % 4 === 0 ? 'long' : 'short';
+        } else {
+          pomoState.mode = 'work';
+        }
+        pomoState.seconds = pomoTimes[pomoState.mode];
+        pomoState.total = pomoTimes[pomoState.mode];
+        document.querySelectorAll('.pomo-mode button').forEach((b, i) => {
+          b.classList.toggle('active', (pomoState.mode === 'work' && i === 0) || (pomoState.mode === 'short' && i === 1) || (pomoState.mode === 'long' && i === 2));
+        });
+      }
+      updatePomoDisplay();
+    }, 1000);
+  }
+}
+
+function pomoReset() {
+  clearInterval(pomoState.interval);
+  pomoState.running = false;
+  pomoState.seconds = pomoTimes[pomoState.mode];
+  pomoState.total = pomoTimes[pomoState.mode];
+  document.getElementById('pomo-start').textContent = 'Başlat';
+  document.getElementById('pomo-toggle').classList.remove('pomo-active');
+  updatePomoDisplay();
+}
+
+function updatePomoDisplay() {
+  const m = Math.floor(pomoState.seconds / 60);
+  const s = pomoState.seconds % 60;
+  const timeStr = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  document.getElementById('pomo-time').textContent = timeStr;
+  document.getElementById('pomo-bar').style.width = (pomoState.seconds / pomoState.total * 100) + '%';
+  if (pomoState.running) {
+    document.title = `${timeStr} · StudyNotes`;
+  } else {
+    document.title = 'StudyNotes';
+  }
+}
+
+// ═══════════════════ THEME ═══════════════════
+function toggleTheme() {
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
+  localStorage.setItem('sn_theme', dark ? 'light' : 'dark');
+  document.getElementById('icon-sun').style.display = dark ? 'block' : 'none';
+  document.getElementById('icon-moon').style.display = dark ? 'none' : 'block';
+}
+
+function loadTheme() {
+  const theme = localStorage.getItem('sn_theme') || 'light';
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('icon-sun').style.display = theme === 'light' ? 'block' : 'none';
+  document.getElementById('icon-moon').style.display = theme === 'dark' ? 'block' : 'none';
+}
+
+// ═══════════════════ TOAST ═══════════════════
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ═══════════════════ KEYBOARD ═══════════════════
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey) {
+    if (e.key === 'n' || e.key === 'N') { e.preventDefault(); createNote(); }
+    if (e.key === 's' || e.key === 'S') { e.preventDefault(); exportJSON(); }
+  }
+});
+
+// ═══════════════════ INIT ═══════════════════
+loadTheme();
+load();
+renderNotes();
+</script>
+</body>
+</html>
