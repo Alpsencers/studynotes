@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudyNotes — Akıllı Not Tutma Uygulaması</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0D0D0C;--tx:#E8E5DC;--tx2:#A09D94;--ac:#6FCF97;--ac2:#2D6A4F;--gold:#D4B87A;--bd:#2A2926}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;overflow-x:hidden}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;opacity:0.04;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+.hero{max-width:800px;margin:0 auto;padding:100px 24px 60px;text-align:center}
+.badge{display:inline-block;padding:6px 16px;border:1px solid var(--bd);border-radius:20px;font-size:12px;color:var(--gold);letter-spacing:1px;text-transform:uppercase;margin-bottom:28px}
+h1{font-family:'Fraunces',serif;font-size:clamp(36px,6vw,56px);font-weight:800;line-height:1.15;margin-bottom:20px;letter-spacing:-1px}
+h1 span{color:var(--ac)}
+.subtitle{font-size:18px;color:var(--tx2);line-height:1.7;max-width:560px;margin:0 auto 40px}
+.cta-group{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.btn{padding:14px 32px;border-radius:10px;font:600 15px 'DM Sans',sans-serif;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px;transition:all 0.25s ease}
+.btn-primary{background:var(--ac);color:#0D0D0C;border:none}
+.btn-primary:hover{background:#8EDBB0;transform:translateY(-2px);box-shadow:0 8px 24px rgba(111,207,151,0.25)}
+.btn-secondary{background:transparent;color:var(--tx);border:1px solid var(--bd)}
+.btn-secondary:hover{border-color:var(--ac);color:var(--ac)}
+
+.features{max-width:800px;margin:0 auto;padding:40px 24px 80px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
+.feature{padding:28px;border:1px solid var(--bd);border-radius:14px;background:rgba(255,255,255,0.02)}
+.feature-icon{font-size:28px;margin-bottom:14px}
+.feature h3{font-size:15px;font-weight:600;margin-bottom:8px}
+.feature p{font-size:13px;color:var(--tx2);line-height:1.6}
+
+.footer{text-align:center;padding:40px 24px;border-top:1px solid var(--bd);font-size:12px;color:var(--tx2)}
+.footer a{color:var(--ac);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="badge">Ücretsiz & Açık Kaynak</div>
+  <h1>Notlarını <span>akıllıca</span> tut.</h1>
+  <p class="subtitle">StudyNotes, öğrenciler için tasarlanmış minimalist bir not tutma uygulaması. Zengin metin editörü, Pomodoro zamanlayıcı ve zarif arayüzüyle ders çalışmayı keyifli hale getir.</p>
+  <div class="cta-group">
+    <a href="studynotes.html" download class="btn btn-primary">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Uygulamayı İndir
+    </a>
+    <a href="studynotes.html" class="btn btn-secondary">Tarayıcıda Dene →</a>
+  </div>
+</div>
+
+<div class="features">
+  <div class="feature">
+    <div class="feature-icon">✏️</div>
+    <h3>WYSIWYG Editör</h3>
+    <p>Kalın, italik, başlıklar, listeler, alıntılar, kod blokları ve renklendirme ile zengin notlar oluştur.</p>
+  </div>
+  <div class="feature">
+    <div class="feature-icon">🍅</div>
+    <h3>Pomodoro Zamanlayıcı</h3>
+    <p>25 dakika çalış, 5 dakika mola ver. Oturum ve toplam süre takibi ile verimli çalış.</p>
+  </div>
+  <div class="feature">
+    <div class="feature-icon">🖼️</div>
+    <h3>Resim Desteği</h3>
+    <p>Sürükle-bırak, kopyala-yapıştır veya dosya seçerek notlarına resim ekle.</p>
+  </div>
+  <div class="feature">
+    <div class="feature-icon">🌗</div>
+    <h3>Koyu & Açık Tema</h3>
+    <p>Premium koyu tema ile gece çalışmalarında gözlerini yormadan not tut.</p>
+  </div>
+  <div class="feature">
+    <div class="feature-icon">📤</div>
+    <h3>Paylaş & Dışa Aktar</h3>
+    <p>Notlarını HTML, PDF veya JSON olarak dışa aktar. Arkadaşlarınla kolayca paylaş.</p>
+  </div>
+  <div class="feature">
+    <div class="feature-icon">⌨️</div>
+    <h3>Klavye Kısayolları</h3>
+    <p>Ctrl+N yeni not, Ctrl+B kalın, Ctrl+I italik, Ctrl+S dışa aktar ve daha fazlası.</p>
+  </div>
+</div>
+
+<div class="footer">
+  <p>StudyNotes · Alpsencer Sarıakçalı tarafından geliştirildi · <a href="https://github.com/Alpsencers/studynotes" target="_blank">GitHub</a></p>
+</div>
+</body>
+</html>
