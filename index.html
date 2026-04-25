@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>StudyNotes — Akıllı Not Tutma Uygulaması</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D0D0C">
+<meta name="application-name" content="StudyNotes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="StudyNotes">
+<link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+<link rel="apple-touch-icon" href="icons/icon.svg">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#0D0D0C;--tx:#E8E5DC;--tx2:#A09D94;--ac:#6FCF97;--ac2:#2D6A4F;--gold:#D4B87A;--bd:#2A2926}
@@ -82,7 +89,14 @@ h1 span{color:var(--ac)}
 </div>
 
 <div class="footer">
-  <p>StudyNotes · Alpsencer Sarıakçalı tarafından geliştirildi · <a href="https://github.com/Alpsencers/studynotes" target="_blank">GitHub</a></p>
+  <p>StudyNotes · Alp Şen tarafından geliştirildi · <a href="https://github.com/Alpsencers/studynotes" target="_blank">GitHub</a></p>
 </div>
+<script>
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js').catch(() => {});
+  });
+}
+</script>
 </body>
 </html>

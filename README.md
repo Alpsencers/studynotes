@@ -57,6 +57,21 @@ Kenar çubuğunda toplam not sayısı, kelime sayısı ve karakter sayısı anl�
 
 ---
 
+## 📱 PWA olarak Yükleme
+
+StudyNotes artık bir **Progressive Web App**. Tarayıcı sekmesi yerine kendi penceresinde, çevrimdışı çalışır şekilde sisteminize kurabilirsiniz.
+
+**Canlı sürümden yüklemek için:**
+1. Chrome veya Edge ile [canlı demoyu](https://alpsencers.github.io/studynotes/studynotes.html) açın
+2. Adres çubuğunun sağındaki ⊕ (yükle) ikonuna ya da uygulama içindeki ↓ butonuna tıklayın
+3. "Yükle" deyin — Başlat menüsünde "StudyNotes" olarak görünür, görev çubuğuna sabitleyebilirsiniz
+
+**Yerel olarak yüklemek için:** Repoyu indirin ve `StudyNotes-Baslat.bat` dosyasına çift tıklayın — Python tabanlı yerel bir sunucu (port 8765) başlatır ve tarayıcıyı açar; aynı yükleme adımlarını uygulayabilirsiniz. Service Worker `file://` üzerinde çalışmadığı için yerel kurulumda sunucu gereklidir.
+
+Yüklemenin ardından uygulama **çevrimdışı** da çalışır; fontlar ve `html2pdf` CDN'i ilk açılışta önbelleğe alınır.
+
+---
+
 ## 🛠️ Teknoloji
 
 - **Saf HTML/CSS/JS** — framework veya build adımı yok
@@ -71,8 +86,14 @@ Kenar çubuğunda toplam not sayısı, kelime sayısı ve karakter sayısı anl�
 
 ```
 studynotes/
-├── index.html          # Tanıtım / landing sayfası
-├── studynotes.html     # Ana uygulama
+├── index.html              # Tanıtım / landing sayfası
+├── studynotes.html         # Ana uygulama
+├── manifest.json           # PWA manifest
+├── service-worker.js       # Çevrimdışı önbellek
+├── icons/
+│   ├── icon.svg            # Normal ikon
+│   └── icon-maskable.svg   # Maskable ikon (Windows/Android)
+├── StudyNotes-Baslat.bat   # Yerel sunucu başlatıcı (Windows)
 └── README.md
 ```
 

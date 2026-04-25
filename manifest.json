@@ -1,0 +1,38 @@
+{
+  "name": "StudyNotes — Akıllı Not Tutma",
+  "short_name": "StudyNotes",
+  "description": "Öğrenciler için minimalist not tutma uygulaması. Zengin metin editörü, Pomodoro zamanlayıcı ve koyu tema desteği.",
+  "lang": "tr",
+  "dir": "ltr",
+  "start_url": "./studynotes.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
+  "orientation": "any",
+  "background_color": "#FAFAF7",
+  "theme_color": "#2D6A4F",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Yeni Not",
+      "short_name": "Yeni Not",
+      "description": "Boş bir not oluştur",
+      "url": "./studynotes.html?new=1",
+      "icons": [{ "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    }
+  ]
+}

@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>StudyNotes</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#FAFAF7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0D0D0C" media="(prefers-color-scheme: dark)">
+<meta name="application-name" content="StudyNotes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="StudyNotes">
+<link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+<link rel="apple-touch-icon" href="icons/icon.svg">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=DM+Sans:wght@400;500;600;700&family=Fraunces:ital,wght@0,600;0,700;0,800;1,600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <style>
@@ -181,6 +190,9 @@ body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9999;o
         StudyNotes
       </div>
       <div class="header-actions">
+        <button class="header-btn" id="install-btn" onclick="installApp()" title="Uygulamayı Yükle" style="display:none">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </button>
         <button class="header-btn" id="pomo-toggle" onclick="togglePomo()" title="Pomodoro">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3L2 6"/><path d="M22 6l-3-3"/></svg>
         </button>
@@ -835,6 +847,42 @@ document.addEventListener('keydown', e => {
 loadTheme();
 load();
 renderNotes();
+
+// Manifest shortcut: ?new=1 → boş not aç
+if (new URLSearchParams(location.search).get('new') === '1') {
+  createNote();
+  history.replaceState({}, '', location.pathname);
+}
+
+// ═══════════════════ PWA: SERVICE WORKER ═══════════════════
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('service-worker.js').catch(() => {});
+  });
+}
+
+// ═══════════════════ PWA: INSTALL PROMPT ═══════════════════
+let deferredInstall = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredInstall = e;
+  const btn = document.getElementById('install-btn');
+  if (btn) btn.style.display = 'flex';
+});
+window.addEventListener('appinstalled', () => {
+  deferredInstall = null;
+  const btn = document.getElementById('install-btn');
+  if (btn) btn.style.display = 'none';
+  toast('Uygulama yüklendi');
+});
+function installApp() {
+  if (!deferredInstall) {
+    toast('Tarayıcı menüsünden "Uygulamayı yükle" seçeneğini kullan');
+    return;
+  }
+  deferredInstall.prompt();
+  deferredInstall.userChoice.finally(() => { deferredInstall = null; });
+}
 </script>
 </body>
 </html>

@@ -1,0 +1,12 @@
+# Windows / OneDrive cruft
+desktop.ini
+Thumbs.db
+ehthumbs.db
+.DS_Store
+*.tmp
+~$*
+
+# Editor cruft
+.vscode/
+.idea/
+*.swp
